@@ -64,23 +64,24 @@ function find_exec ()
 
 function as_build ()
 {
-    docker build --no-cache --pull --tag "bviktor/ansible-systemd-${PLATFORM}:${RELEASE}" "${2}"
+    ${exec} build --no-cache --pull --tag "bviktor/ansible-systemd-${PLATFORM}:${RELEASE}" "${2}"
 }
 
 function as_push ()
 {
-    docker push "bviktor/ansible-systemd-${PLATFORM}:${RELEASE}"
+    ${exec} push "bviktor/ansible-systemd-${PLATFORM}:${RELEASE}"
 }
 
 function as_scan ()
 {
-    docker scout quickview "bviktor/ansible-systemd-${PLATFORM}:${RELEASE}"
+    if [ "${exec}" == 'docker' ]
+    then
+        ${exec} scout quickview "bviktor/ansible-systemd-${PLATFORM}:${RELEASE}"
+    fi
 }
 
 function as_run ()
 {
-    # Determine container solution
-    export exec=$(find_exec)
     # Fire up instance
     CONT_ID=$(${exec} run --rm --detach "bviktor/ansible-systemd-${PLATFORM}:${RELEASE}")
     # Don't exit the container if errors occur
@@ -90,6 +91,9 @@ function as_run ()
     # Stop instance
     ${exec} stop "${CONT_ID}"
 }
+
+# Determine container solution
+export exec=$(find_exec)
 
 case "$1" in
     build)
